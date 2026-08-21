@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid isPermaLink="true">https://kariyerkapisi.gov.tr/IlanDetay?i=sample-guid</guid>
+      <link>https://kariyerkapisi.gov.tr/IlanDetay?i=sample-guid</link>
+      <category>Sözleşmeli Personel İlanları</category>
+      <title>ÖRNEK KURUM - BİLİŞİM PERSONELİ ALIM İLANI</title>
+      <description>Örnek ilan açıklaması</description>
+      <pubDate>Mon, 17 Aug 2026 08:00:00 +0300</pubDate>
+      <enclosure url="https://kariyerkapisi.gov.tr/UPS/sample.png" type="image/png" />
+    </item>
+  </channel>
+</rss>

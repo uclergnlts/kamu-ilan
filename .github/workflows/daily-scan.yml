@@ -1,0 +1,31 @@
+name: Daily listing scan
+
+on:
+  schedule:
+    # Europe/Istanbul UTC+3: 07:30 local time.
+    - cron: "30 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-listing-scan
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger protected daily job
+        env:
+          BASE_URL: ${{ secrets.ILANDETECT_BASE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$BASE_URL"
+          test -n "$CRON_SECRET"
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-all-errors --max-time 300 \
+            -X POST "${BASE_URL%/}/api/v1/jobs/daily" \
+            -H "Authorization: Bearer ${CRON_SECRET}"
+

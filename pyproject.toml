@@ -1,0 +1,38 @@
+[project]
+name = "ilandetect"
+version = "0.1.0"
+description = "Kamu personeli ilan takip ve bildirim servisi"
+requires-python = ">=3.9"
+dependencies = [
+  "apscheduler>=3.11,<4",
+  "eval-type-backport>=0.2.2,<1; python_version < '3.10'",
+  "fastapi>=0.116,<1",
+  "httpx>=0.28,<1",
+  "pydantic-settings>=2.10,<3",
+  "psycopg[binary]>=3.2,<4",
+  "sqlalchemy>=2.0,<3",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.4,<9", "pytest-cov>=6.2,<7", "ruff>=0.12,<1"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/models.py" = ["UP045"] # SQLAlchemy 2 resolves Optional correctly on Python 3.9.
