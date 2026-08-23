@@ -84,4 +84,7 @@ def test_digest_html_escapes_listing_content() -> None:
 
     assert "Örnek &amp; Kurum" in html
     assert "Mühendis &lt;Alımı&gt;" in html
+    assert "Günlük kamu ilanları" in html
+    assert "Resmî ilanı görüntüle" in html
+    assert "Yeni ilan" in html
     session.close()
