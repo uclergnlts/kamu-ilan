@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import re
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 from urllib.parse import parse_qs, urlparse
 from xml.etree import ElementTree
 
+import httpx
+
 from app.adapters.base import SourceAdapter
 from app.schemas import NormalizedListing
+
+logger = logging.getLogger(__name__)
 
 
 class KariyerKapisiAdapter(SourceAdapter):
@@ -26,10 +31,21 @@ class KariyerKapisiAdapter(SourceAdapter):
     async def fetch_enriched(self, limit: int) -> list[NormalizedListing]:
         listings = (await self.fetch())[:limit]
         semaphore = asyncio.Semaphore(4)
+        enrichment_unavailable = asyncio.Event()
 
         async def enrich(listing: NormalizedListing) -> NormalizedListing:
             async with semaphore:
-                return await self.enrich(listing)
+                if enrichment_unavailable.is_set():
+                    return listing
+                try:
+                    return await self.enrich(listing)
+                except httpx.HTTPError as exc:
+                    enrichment_unavailable.set()
+                    logger.warning(
+                        "Kariyer Kapisi detail API unavailable; continuing with RSS data: %s",
+                        exc,
+                    )
+                    return listing
 
         return list(await asyncio.gather(*(enrich(listing) for listing in listings)))
 

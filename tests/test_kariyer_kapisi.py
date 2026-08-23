@@ -1,6 +1,13 @@
+import asyncio
 from pathlib import Path
 
-from app.adapters.kariyer_kapisi import enrich_listing, parse_rss
+import httpx
+
+from app.adapters.kariyer_kapisi import (
+    KariyerKapisiAdapter,
+    enrich_listing,
+    parse_rss,
+)
 
 
 def test_parse_rss_normalizes_public_fields() -> None:
@@ -49,3 +56,20 @@ def test_enrich_listing_aggregates_verified_detail_fields() -> None:
     assert enriched.kpss_types == ["P3", "P93"]
     assert enriched.education == ["Ön lisans", "Lisans"]
     assert enriched.application_end.isoformat() == "2026-08-31"
+
+
+def test_fetch_enriched_falls_back_to_rss_when_detail_api_times_out() -> None:
+    listing = parse_rss(Path("tests/fixtures/kariyer_kapisi_rss.xml").read_bytes())[0]
+
+    class TimeoutClient:
+        async def post(self, url: str, **kwargs):
+            request = httpx.Request("POST", url)
+            raise httpx.ConnectTimeout("connection timed out", request=request)
+
+    class FixtureAdapter(KariyerKapisiAdapter):
+        async def fetch(self):
+            return [listing]
+
+    result = asyncio.run(FixtureAdapter(TimeoutClient()).fetch_enriched(limit=1))
+
+    assert result == [listing]
