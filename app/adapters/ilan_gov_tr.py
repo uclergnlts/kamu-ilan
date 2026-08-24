@@ -12,4 +12,3 @@ class IlanGovTrAdapter(SourceAdapter):
         raise NotImplementedError(
             "Parser, kullanım izni ve ilan kategori kapsamı doğrulandıktan sonra etkinleştirilecek."
         )
-

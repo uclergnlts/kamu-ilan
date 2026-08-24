@@ -1,2 +1,1 @@
 """IlanDetect application package."""
-

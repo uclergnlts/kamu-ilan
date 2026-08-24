@@ -11,4 +11,3 @@ class OsymAdapter(SourceAdapter):
         raise NotImplementedError(
             "KPSS tercih duyurusu ve kadro tablosu ayrıştırıcıları tamamlanınca etkinleştirilecek."
         )
-

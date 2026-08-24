@@ -14,4 +14,3 @@ def test_fingerprint_is_stable_and_changes_with_content() -> None:
 
     assert listing_fingerprint(listing) == listing_fingerprint(same_content_other_source_id)
     assert listing_fingerprint(listing) != listing_fingerprint(changed)
-

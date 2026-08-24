@@ -11,4 +11,3 @@ class ResmiGazeteAdapter(SourceAdapter):
         raise NotImplementedError(
             "Günlük ilan bölümü ve PDF/HTML ayrıştırma sözleşmesi tamamlanınca etkinleştirilecek."
         )
-
