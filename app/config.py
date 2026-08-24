@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     admin_email: str | None = None
     resend_api_key: str | None = None
     email_from: str = "IlanDetect <ilan@ornek.com>"
+    public_base_url: str = "https://kamu-ilan.onrender.com"
     ilan_gov_tr_enabled: bool = True
     kariyer_kapisi_enabled: bool = True
     iskur_enabled: bool = True

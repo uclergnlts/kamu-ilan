@@ -64,3 +64,4 @@ class UserFilterUpsert(BaseModel):
 
 class UserFilterRead(UserFilterUpsert):
     id: int
+    subscribed: bool

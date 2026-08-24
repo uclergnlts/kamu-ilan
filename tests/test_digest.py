@@ -80,11 +80,18 @@ def test_sent_listing_can_appear_as_expiring_reminder() -> None:
 def test_digest_html_escapes_listing_content() -> None:
     session, filters, _ = setup_digest_data()
     content = prepare_digest(session, filters, today=date(2026, 8, 20))
-    _, html = render_digest(content, today=date(2026, 8, 20))
+    subject, html = render_digest(
+        content,
+        today=date(2026, 8, 20),
+        unsubscribe_url="https://example.com/unsubscribe",
+    )
 
+    assert subject == "20.08.2026 - Kamu İlanları"
     assert "Örnek &amp; Kurum" in html
     assert "Mühendis &lt;Alımı&gt;" in html
     assert "Günlük kamu ilanları" in html
     assert "Resmî ilanı görüntüle" in html
     assert "Yeni ilan" in html
+    assert 'href="https://example.com/unsubscribe"' in html
+    assert "Abonelikten çık" in html
     session.close()

@@ -84,6 +84,7 @@ class UserFilter(Base):
     __tablename__ = "user_filters"
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(320), unique=True)
+    subscribed: Mapped[bool] = mapped_column(Boolean, default=True)
     send_hour: Mapped[int] = mapped_column(Integer, default=8)
     cities: Mapped[list[str]] = mapped_column(JSON, default=list)
     include_keywords: Mapped[list[str]] = mapped_column(JSON, default=list)

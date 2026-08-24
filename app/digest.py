@@ -67,9 +67,11 @@ def prepare_digest(session: Session, filters: UserFilter, *, today: date) -> Dig
     return DigestContent(new=new, updated=updated, expiring=expiring)
 
 
-def render_digest(content: DigestContent, *, today: date) -> tuple[str, str]:
+def render_digest(
+    content: DigestContent, *, today: date, unsubscribe_url: str | None = None
+) -> tuple[str, str]:
     count = len(content.listing_ids)
-    subject = f"Kamu ilanları günlük özeti — {count} eşleşme"
+    subject = f"{today:%d.%m.%Y} - Kamu İlanları"
     sections = [
         _render_section("Size uygun yeni ilanlar", content.new, today),
         _render_section("Güncellenen ilanlar", content.updated, today),
@@ -84,6 +86,13 @@ def render_digest(content: DigestContent, *, today: date) -> tuple[str, str]:
             '<div style="font-size:14px;line-height:22px;margin-top:6px">'
             "Kriterlerinize uygun yeni bir ilan yayımlandığında burada göreceksiniz.</div></div>"
         ]
+    unsubscribe = ""
+    if unsubscribe_url:
+        safe_unsubscribe_url = escape(unsubscribe_url, quote=True)
+        unsubscribe = (
+            f'<br><a href="{safe_unsubscribe_url}" style="color:#64748b;'
+            'text-decoration:underline">Abonelikten çık</a>'
+        )
     html = f"""<!doctype html>
 <html lang="tr">
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a">
@@ -107,6 +116,7 @@ def render_digest(content: DigestContent, *, today: date) -> tuple[str, str]:
         <tr><td style="padding:22px 24px;text-align:center;color:#64748b;font-size:12px;line-height:19px">
           Başvuru yapmadan önce şartları ve tarihleri resmî ilan sayfasından kontrol edin.<br>
           Bu e-posta IlanDetect tarafından otomatik olarak hazırlanmıştır.
+          {unsubscribe}
         </td></tr>
       </table>
     </td></tr>
@@ -120,6 +130,8 @@ async def send_daily_digest(session: Session, settings: Settings) -> dict:
     filters = session.scalar(select(UserFilter).limit(1))
     if filters is None:
         return {"status": "skipped", "reason": "user_filter_missing"}
+    if not filters.subscribed:
+        return {"status": "skipped", "reason": "unsubscribed"}
     today = datetime.now(ZoneInfo(settings.timezone)).date()
     content = prepare_digest(session, filters, today=today)
     if not content.listing_ids and not filters.send_empty_digest:
@@ -137,7 +149,11 @@ async def send_daily_digest(session: Session, settings: Settings) -> dict:
     if existing:
         return {"status": "already_sent", "delivery_id": existing.id}
 
-    subject, html = render_digest(content, today=today)
+    subject, html = render_digest(
+        content,
+        today=today,
+        unsubscribe_url=f"{settings.public_base_url.rstrip('/')}/unsubscribe",
+    )
     delivery = EmailDelivery(
         user_filter_id=filters.id,
         status="pending",
